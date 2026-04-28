@@ -71,14 +71,14 @@ function LoginForms({ signedInAsGuest }: { signedInAsGuest?: boolean }) {
         <div className="text-center">
           <h1 className="text-2xl font-bold">
             {signedInAsGuest
-              ? "アカウント作成（データを引き継ぎ）"
+              ? <>アカウント作成<br />（データ引き継ぎ）</>
               : mode === "signin"
                 ? "サインイン"
                 : "アカウント作成"}
           </h1>
           <p className="text-foreground-500 mt-1 text-sm">
             {signedInAsGuest
-              ? "ゲストとして作成したデータは、そのままアカウントに引き継がれます。"
+              ? <>ゲストとして作成したデータは、<br/> そのままアカウントに引き継がれます。</>
               : "アイデアボードへようこそ"}
           </p>
         </div>
