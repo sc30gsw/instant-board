@@ -17,7 +17,7 @@ export function GoogleSignInButton({
       href={url}
       aria-disabled={isPending}
       className={cn(
-        "bg-background inline-flex w-full items-center justify-center gap-2 rounded-full border hover:opacity-80",
+        "bg-background button w-full border hover:opacity-80",
         isPending && "pointer-events-none opacity-50",
       )}
     >
