@@ -6,8 +6,8 @@ export const schema = i.schema({
       email: i.string().unique().indexed(),
       username: i.string().optional().indexed(),
     }),
-    // Custom Auth 用。passwordHash は Admin SDK 経由のみアクセス可。
-    // perms で view/create/update/delete = "false" に設定済み。
+    //? Custom Auth 用。passwordHash は Admin SDK 経由のみアクセス可。
+    //? perms で view/create/update/delete = "false" に設定済み。
     userCredentials: i.entity({
       createdAt: i.date().indexed(),
       passwordHash: i.string(),

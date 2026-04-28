@@ -9,8 +9,8 @@ const rules = {
       view: "auth.id == data.id",
     },
   },
-  // クライアントから userCredentials には一切アクセスさせない。
-  // 全操作は Admin SDK (Server Function) 経由のみ。
+  //! クライアントから userCredentials には一切アクセスさせない。
+  //! 全操作は Admin SDK (Server Function) 経由のみ。
   userCredentials: {
     allow: {
       create: "false",
@@ -37,7 +37,7 @@ const rules = {
       create: "auth.id != null",
       delete: "auth.id != null && auth.id in data.ref('author.id')",
       update: "auth.id != null && auth.id in data.ref('author.id')",
-      // board.isPublic はリストを返すので [0] で取り出す
+      //? board.isPublic はリストを返すので [0] で取り出す
       view: "data.ref('board.isPublic')[0] == true || (auth.id != null && auth.id in data.ref('board.owner.id'))",
     },
   },

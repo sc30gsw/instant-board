@@ -63,12 +63,6 @@ importers:
       better-result:
         specifier: ^2.8.2
         version: 2.8.2
-      dayjs:
-        specifier: ^1.11.20
-        version: 1.11.20
-      es-toolkit:
-        specifier: ^1.46.0
-        version: 1.46.0
       react:
         specifier: ^19.2.5
         version: 19.2.5
@@ -2405,9 +2399,6 @@ packages:
 
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
-
-  es-toolkit@1.46.0:
-    resolution: {integrity: sha512-IToJ6ct9OLl5zz6WsC/1vZEwfSZ7Myil+ygl5Tf30Xjn9AEkzNB4kqp2G7VUJKF1DtTx/ra5M5KLlXvzOg51BA==}
 
   esbuild@0.27.7:
     resolution: {integrity: sha512-IxpibTjyVnmrIQo5aqNpCgoACA/dTKLTlhMHihVHhdkxKyPO1uBBthumT0rdHmcsk9uMonIWS0m4FljWzILh3w==}
@@ -5189,8 +5180,6 @@ snapshots:
   entities@7.0.1: {}
 
   es-module-lexer@1.7.0: {}
-
-  es-toolkit@1.46.0: {}
 
   esbuild@0.27.7:
     optionalDependencies:
