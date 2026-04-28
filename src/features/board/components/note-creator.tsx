@@ -1,108 +1,25 @@
-import { Button, FieldError, Label, TextField, Textarea } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import type { AnyFormState } from "@tanstack/react-form";
-import { useState } from "react";
+import type { User } from "@instantdb/react";
+import { useToggle } from "react-use";
 
-import { NOTE_COLORS } from "~/features/board/constants/board";
-import { useNoteCreateForm } from "~/features/board/hooks/use-note-create-form";
+import { NoteCreatorPanel } from "~/features/board/components/note-creator-panel";
+import type { Board } from "~/features/board/types/board";
 
-type Props = {
-  boardId: string;
-  userId: string;
+type NoteCreatorProps = {
+  boardId: Board["id"];
+  userId: User["id"];
 };
 
-type NoteCreatorPanelProps = {
-  boardId: string;
-  onClose: () => void;
-  userId: string;
-};
-
-function NoteCreatorPanel({ boardId, userId, onClose }: NoteCreatorPanelProps) {
-  const { form } = useNoteCreateForm({ boardId, userId, onSuccess: onClose });
-  const [liveColor, setLiveColor] = useState<string>(NOTE_COLORS[0]);
-
-  return (
-    <form
-      className="bg-background fixed right-6 bottom-6 flex w-72 flex-col gap-3 rounded-xl p-4 shadow-xl"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void form.handleSubmit();
-      }}
-    >
-      <form.Field name="content">
-        {(field) => (
-          <div className="flex flex-col gap-1">
-            <TextField
-              className="w-full"
-              isInvalid={field.state.meta.errors.length > 0}
-              name={field.name}
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-            >
-              <Label className="sr-only">内容</Label>
-              <Textarea
-                className="h-32"
-                placeholder="アイデアを入力..."
-                style={{ backgroundColor: liveColor }}
-              />
-              {field.state.meta.errors.length > 0 ? (
-                <FieldError className="text-xs">{String(field.state.meta.errors[0])}</FieldError>
-              ) : null}
-            </TextField>
-          </div>
-        )}
-      </form.Field>
-      <form.Field name="color">
-        {(field) => (
-          <div className="flex gap-2">
-            {NOTE_COLORS.map((c) => (
-              <button
-                key={c}
-                className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
-                style={{
-                  backgroundColor: c,
-                  borderColor: c === field.state.value ? "#374151" : "transparent",
-                }}
-                type="button"
-                onClick={() => {
-                  field.handleChange(c);
-                  setLiveColor(c);
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </form.Field>
-      <div className="flex gap-2">
-        <Button className="flex-1" type="button" variant="ghost" onPress={onClose}>
-          キャンセル
-        </Button>
-        <form.Subscribe>
-          {(state: AnyFormState) => (
-            <Button
-              className="flex-1"
-              isDisabled={state.isSubmitting}
-              type="submit"
-              variant="primary"
-            >
-              追加
-            </Button>
-          )}
-        </form.Subscribe>
-      </div>
-    </form>
-  );
-}
-
-export function NoteCreator({ boardId, userId }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+export function NoteCreator({ boardId, userId }: NoteCreatorProps) {
+  const [isOpen, toggle] = useToggle(false);
 
   if (!isOpen) {
     return (
       <Button
         className="fixed right-6 bottom-6 h-14 rounded-full px-5 text-sm font-medium shadow-lg"
         variant="primary"
-        onPress={() => setIsOpen(true)}
+        onPress={() => toggle(true)}
       >
         <Icon height={20} icon="mdi:note-plus-outline" width={20} />
         付箋を追加
@@ -110,5 +27,5 @@ export function NoteCreator({ boardId, userId }: Props) {
     );
   }
 
-  return <NoteCreatorPanel boardId={boardId} userId={userId} onClose={() => setIsOpen(false)} />;
+  return <NoteCreatorPanel boardId={boardId} userId={userId} onClose={() => toggle(false)} />;
 }

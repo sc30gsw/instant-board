@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { db } from "~/db/instant";
 import { useCurrentUserProfile } from "~/features/auth/hooks/use-current-user-profile";
 import { BoardHeader } from "~/features/board/components/board-header";
 import { NoteCard } from "~/features/board/components/note-card";
@@ -14,7 +13,6 @@ export const Route = createFileRoute("/_authenticated/board/$boardId")({
 
 function BoardPage() {
   const { boardId } = Route.useParams();
-  const navigate = useNavigate();
   const { profile, user } = useCurrentUserProfile();
   const { data, isLoading, error } = useBoard(boardId);
 
@@ -35,31 +33,18 @@ function BoardPage() {
   }
 
   const board = data?.boards?.[0];
-  const resolvedBoardId = board?.id;
 
   if (!board) {
-    void navigate({ to: "/" });
-    return null;
-  }
-
-  async function handleDeleteBoard() {
-    const confirmed = window.confirm("このボードを削除しますか？");
-    if (!confirmed) return;
-
-    if (!resolvedBoardId) return;
-
-    await db.transact(db.tx.boards[resolvedBoardId]!.delete());
-    void navigate({ to: "/" });
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-danger">ボードが見つかりません</p>
+      </div>
+    );
   }
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <BoardHeader
-        board={board}
-        currentUsername={profile?.username}
-        onDeleteBoard={() => void handleDeleteBoard()}
-        user={user ?? null}
-      />
+      <BoardHeader board={board} currentUsername={profile?.username} user={user ?? null} />
 
       <div className="relative flex-1 overflow-hidden">
         {board.notes?.map((note) => (
