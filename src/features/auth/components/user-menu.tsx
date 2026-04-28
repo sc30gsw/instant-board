@@ -13,7 +13,6 @@ export function UserMenu({
 }: Pick<User, "email" | "imageURL"> &
   Partial<Pick<InstaQLEntity<AppSchema, "$users">, "username">>) {
   const displayName = username || getEmailLocalPart(email) || "ゲスト";
-  console.log("🚀 ~ UserMenu ~ displayName:", displayName);
   const [open, toggle] = useToggle(false);
 
   return (
