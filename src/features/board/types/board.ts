@@ -10,13 +10,5 @@ export type BoardWithNotes = InstaQLEntity<
   { owner: {}; notes: { author: {} } }
 >;
 
-export const NOTE_COLORS = [
-  "#fef08a",
-  "#bbf7d0",
-  "#bfdbfe",
-  "#fecaca",
-  "#e9d5ff",
-  "#fed7aa",
-] as const;
 
-export type NoteColor = (typeof NOTE_COLORS)[number];
+

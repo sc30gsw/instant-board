@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { db } from "~/db/instant";
-import { NOTE_COLORS } from "~/features/board/types/board";
+import { NOTE_COLORS } from "~/features/board/constants/board";
 import type { NoteWithAuthor } from "~/features/board/types/board";
 
 type Props = {

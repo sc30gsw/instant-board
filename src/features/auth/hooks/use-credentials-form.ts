@@ -7,7 +7,7 @@ import {
   signupWithPasswordServer,
   signinWithPasswordServer,
 } from "~/features/auth/api/credential-server";
-import { useAppForm } from "~/features/auth/hooks/create-login-form";
+import { useAppForm } from "~/lib/forms/create-app-form";
 import { getLoginFormSchema, loginFormEmptyValues } from "~/features/auth/schemas/login-schema";
 import type { LoginMode, LoginStep } from "~/features/auth/schemas/login-schema";
 

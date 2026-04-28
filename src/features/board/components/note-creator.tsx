@@ -4,7 +4,7 @@ import { id } from "@instantdb/react";
 import { useState } from "react";
 
 import { db } from "~/db/instant";
-import { NOTE_COLORS } from "~/features/board/types/board";
+import { NOTE_COLORS } from "~/features/board/constants/board";
 
 type Props = {
   boardId: string;
