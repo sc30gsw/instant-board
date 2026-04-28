@@ -52,13 +52,12 @@ export function NoteCard({ note, currentUserId }: NoteCardProps) {
     <div
       className={cn(
         "absolute rounded-lg shadow-md select-none",
-        isEditing
-          ? `z-40 w-56 cursor-default bg-${editingColor}`
-          : `w-48 cursor-grab bg-${note.color}`,
+        isEditing ? "z-40 w-56 cursor-default" : "w-48 cursor-grab",
         isDragging ? "z-50 cursor-grabbing" : !isEditing ? "z-1 cursor-grab" : null,
       )}
       //? left/top は実値(px)なので className だけでは表現できない
       style={{
+        backgroundColor: isEditing ? editingColor : note.color,
         left: note.x,
         top: note.y,
       }}
