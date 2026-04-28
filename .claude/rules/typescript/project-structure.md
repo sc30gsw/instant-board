@@ -14,23 +14,23 @@ alwaysApply: true
 src/
 ├── features/          # Business logic — one module per domain
 │   └── [feature]/
-│       ├── api/       # Query/mutation wrappers (wraps generated SDK)
+│       ├── api/       # InstantDB query wrappers / server functions
 │       ├── components/
 │       ├── hooks/
 │       ├── schemas/   # Valibot schemas
-│       ├── stores/    # Jotai atoms
-│       ├── types/     # Type definitions (derived from generated types)
-│       └── mocks/     # MSW handlers for tests
+│       └── types/     # Type definitions
+├── db/                # InstantDB schema, perms, client init
+│   ├── instant-schema.ts
+│   ├── instant.perms.ts
+│   ├── instant.ts          # client init (browser)
+│   └── instant-admin.ts    # admin init (server-only)
 ├── routes/            # TanStack Router file-based routing (minimal logic)
 ├── lib/
-│   ├── api/
-│   │   ├── client.ts       # ky configuration (centralized)
-│   │   └── generated/      # Auto-generated — NEVER edit manually
-│   └── theme.ts
+│   └── utils.ts       # cn helper
 └── styles.css
 ```
 
-`src/components/`, `src/hooks/`, `src/stores/`, `src/utils/` are created on demand when something is genuinely shared across features.
+`src/components/`, `src/hooks/`, `src/utils/` are created on demand when something is genuinely shared across features.
 
 ## `~` alias (relative paths forbidden)
 

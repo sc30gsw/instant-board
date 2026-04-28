@@ -1,27 +1,28 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+import { RouterProvider } from "@heroui/react";
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import { HeadContent, Outlet, Scripts, createRootRoute, useRouter } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
 
-import appCss from '../styles.css?url'
-import { useEffect } from 'react'
+import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
-        title: 'TanStack Start Starter',
+        title: "TanStack Start Starter",
       },
     ],
     links: [
       {
-        rel: 'stylesheet',
+        rel: "stylesheet",
         href: appCss,
       },
     ],
@@ -30,15 +31,16 @@ export const Route = createRootRoute({
   errorComponent: ErrorComponent,
   notFoundComponent: NotFoundComponent,
   pendingComponent: PendingComponent,
-})
+});
 
 function RootDocument() {
+  const router = useRouter();
+
   useEffect(() => {
     if (import.meta.env.DEV) {
       void import("react-grab");
     }
   }, []);
-
 
   return (
     <html lang="ja">
@@ -46,22 +48,24 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <Outlet />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <Scripts />
+        <RouterProvider navigate={(to: string) => void router.navigate({ to })}>
+          <Outlet />
+          <TanStackDevtools
+            config={{
+              position: "bottom-right",
+            }}
+            plugins={[
+              {
+                name: "Tanstack Router",
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+          <Scripts />
+        </RouterProvider>
       </body>
     </html>
-  )
+  );
 }
 
 function NotFoundComponent() {
