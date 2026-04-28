@@ -109,6 +109,7 @@ export function BoardHeader({ board, currentUsername, onDeleteBoard, user }: Pro
           <UserMenu
             email={user.email}
             imageURL={user.imageURL}
+            isGuest={user.isGuest}
             username={currentUsername ?? undefined}
           />
         ) : null}

@@ -19,7 +19,12 @@ function Home() {
           <h1 className="text-xl font-bold">アイデアボード</h1>
           <div className="flex items-center gap-2">
             {user ? (
-              <UserMenu email={user.email} imageURL={user.imageURL} username={profile?.username} />
+              <UserMenu
+                email={user.email}
+                imageURL={user.imageURL}
+                isGuest={user.isGuest}
+                username={profile?.username}
+              />
             ) : null}
             <CreateBoardButton
               userId={user?.id ?? ""}

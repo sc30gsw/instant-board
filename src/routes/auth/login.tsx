@@ -32,13 +32,23 @@ function LoginPage() {
   return (
     <>
       <db.SignedIn>
-        <SignedInRedirect />
+        <SignedInContent />
       </db.SignedIn>
       <db.SignedOut>
         <LoginForms />
       </db.SignedOut>
     </>
   );
+}
+
+function SignedInContent() {
+  const user = db.useUser();
+
+  if (user.isGuest) {
+    return <LoginForms signedInAsGuest />;
+  }
+
+  return <SignedInRedirect />;
 }
 
 function SignedInRedirect() {
@@ -52,7 +62,7 @@ function SignedInRedirect() {
   return null;
 }
 
-function LoginForms() {
+function LoginForms({ signedInAsGuest }: { signedInAsGuest?: boolean }) {
   const { mode } = Route.useSearch();
 
   return (
@@ -60,9 +70,17 @@ function LoginForms() {
       <div className="flex w-full max-w-sm flex-col gap-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">
-            {mode === "signin" ? "サインイン" : "アカウント作成"}
+            {signedInAsGuest
+              ? "アカウント作成（データを引き継ぎ）"
+              : mode === "signin"
+                ? "サインイン"
+                : "アカウント作成"}
           </h1>
-          <p className="text-foreground-500 mt-1 text-sm">アイデアボードへようこそ</p>
+          <p className="text-foreground-500 mt-1 text-sm">
+            {signedInAsGuest
+              ? "ゲストとして作成したデータは、そのままアカウントに引き継がれます。"
+              : "アイデアボードへようこそ"}
+          </p>
         </div>
 
         <LoginFormsContainer />

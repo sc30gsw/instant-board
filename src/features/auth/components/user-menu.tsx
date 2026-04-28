@@ -1,6 +1,7 @@
 import { Avatar, Button, Popover } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { InstaQLEntity, User } from "@instantdb/react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "react-use";
 
 import { db } from "~/db/instant";
@@ -8,12 +9,15 @@ import type { AppSchema } from "~/db/instant-schema";
 
 export function UserMenu({
   email,
+  isGuest,
   imageURL,
   username,
-}: Pick<User, "email" | "imageURL"> &
+}: Pick<User, "email" | "imageURL" | "isGuest"> &
   Partial<Pick<InstaQLEntity<AppSchema, "$users">, "username">>) {
   const displayName = username || getEmailLocalPart(email) || "ゲスト";
   const [open, toggle] = useToggle(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <Popover isOpen={open} onOpenChange={toggle}>
@@ -25,9 +29,26 @@ export function UserMenu({
         <span className="max-w-32 truncate text-sm font-medium">{displayName}</span>
         <Icon className="text-foreground-400" height={16} icon="mdi:chevron-down" width={16} />
       </Popover.Trigger>
-      <Popover.Content className="z-50" placement="bottom end">
+      <Popover.Content className="z-50 p-2 flex flex-col gap-2" placement="bottom end">
+        {isGuest ? (
+          <Button
+            className="justify-start"
+            variant="ghost"
+            onPress={() => {
+              toggle(false);
+              navigate({
+                search: { mode: "signup", returnTo: location.pathname },
+                to: "/auth/login",
+              });
+            }}
+          >
+            <Icon height={16} icon="mdi:account-arrow-up" width={16} />
+            アカウント作成
+          </Button>
+        ) : null}
         <Button
-          className="text-danger flex min-w-40 items-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 text-left text-sm font-medium shadow-lg transition-colors hover:bg-red-50"
+          className="justify-start text-danger"
+          variant="ghost"
           onPress={() => {
             toggle(false);
             db.auth.signOut();
