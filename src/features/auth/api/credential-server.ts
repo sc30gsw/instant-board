@@ -13,11 +13,15 @@ export const signupWithPasswordServer = createServerFn({ method: "POST" })
   .inputValidator((data) => v.parse(v.omit(signupCredentialsSchema, ["code"]), data))
   .handler(async ({ data }) => {
     const existing = await adminDb.query({
-      $users: { $: { where: { email: data.email } } },
+      $users: { $: { where: { or: [{ email: data.email }, { username: data.username }] } } },
     });
 
-    if (existing.$users.length > 0) {
+    if (existing.$users.some((u) => u.email === data.email)) {
       throw new Error("サインアップに失敗しました");
+    }
+
+    if (existing.$users.some((u) => u.username === data.username)) {
+      throw new Error("USERNAME_TAKEN:そのユーザー名はすでに使われています");
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12);
@@ -47,7 +51,7 @@ export const signupWithPasswordServer = createServerFn({ method: "POST" })
 const INVALID_PASSWORD_HASH = "$2b$12$invalid";
 
 export const signinWithPasswordServer = createServerFn({ method: "POST" })
-  .inputValidator((data) => v.parse(v.omit(signinCredentialsSchema, ["code"]), data))
+  .inputValidator((data) => v.parse(v.pick(signinCredentialsSchema, ["email", "password"]), data))
   .handler(async ({ data }) => {
     const result = await adminDb.query({
       $users: {
