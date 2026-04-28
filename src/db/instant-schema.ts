@@ -4,7 +4,7 @@ export const schema = i.schema({
   entities: {
     $users: i.entity({
       email: i.string().unique().indexed(),
-      username: i.string().unique().indexed(),
+      username: i.string().unique().optional().indexed(),
     }),
     //? Custom Auth 用。passwordHash は Admin SDK 経由のみアクセス可。
     //? perms で view/create/update/delete = "false" に設定済み。
