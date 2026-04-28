@@ -1,19 +1,13 @@
-import {
-  Button,
-  FieldError,
-  Input,
-  InputOTP,
-  Label,
-  REGEXP_ONLY_DIGITS,
-  TextField,
-} from "@heroui/react";
+import { Button, FieldError, Input, Label, TextField } from "@heroui/react";
 import type { AnyFormState } from "@tanstack/react-form";
 import { getRouteApi } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
+import { MagicCodeStep } from "~/features/auth/components/magic-code-step";
 import { useCredentialsForm } from "~/features/auth/hooks/use-credentials-form";
-import type { LoginFormValue } from "~/features/auth/schemas/login-schema";
+import type { LoginStep } from "~/features/auth/schemas/login-schema";
 
-function getCredentialsFieldErrorMessage(error: unknown) {
+export function getCredentialsFieldErrorMessage(error: unknown) {
   if (!error) {
     return null;
   }
@@ -34,13 +28,19 @@ const routeApi = getRouteApi("/auth/login");
 type CredentialsFormProps = {
   isPending: boolean;
   onSuccess: () => void;
+  onStepChange?: (step: LoginStep) => void;
 };
 
-export function CredentialsForm({ isPending, onSuccess }: CredentialsFormProps) {
+export function CredentialsForm({ isPending, onSuccess, onStepChange }: CredentialsFormProps) {
   const { mode } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
-  const { form, step } = useCredentialsForm({ mode, onSuccess });
+  const [step, setStep] = useState<LoginStep>("credentials");
+  const { form } = useCredentialsForm({ mode, onSuccess, step, setStep });
+
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [onStepChange, step]);
 
   return (
     <form
@@ -137,7 +137,7 @@ export function CredentialsForm({ isPending, onSuccess }: CredentialsFormProps) 
           </form.Subscribe>
         </>
       ) : (
-        <MagicCodeStep email={form.getFieldValue("email")} form={form} />
+        <MagicCodeStep email={form.getFieldValue("email")} form={form} isPending={isPending} />
       )}
 
       {step === "credentials" && (
@@ -153,68 +153,5 @@ export function CredentialsForm({ isPending, onSuccess }: CredentialsFormProps) 
         </button>
       )}
     </form>
-  );
-}
-
-type MagicCodeStepProps = {
-  email: LoginFormValue["email"];
-  form: ReturnType<typeof useCredentialsForm>["form"];
-};
-
-function MagicCodeStep({ email, form }: MagicCodeStepProps) {
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-foreground-500 text-sm">
-        <strong>{email}</strong>{" "}
-        に認証コードを送信しました。メールを確認して6桁のコードを入力してください。
-      </p>
-
-      <form.Field name="code">
-        {(field) => {
-          const errorMessage = getCredentialsFieldErrorMessage(field.state.meta.errors[0]);
-          return (
-            <div className="flex w-full flex-col gap-2">
-              <Label>認証コード</Label>
-              <InputOTP
-                className="w-full"
-                isInvalid={field.state.meta.errors.length > 0}
-                maxLength={6}
-                name={field.name}
-                pattern={REGEXP_ONLY_DIGITS}
-                value={field.state.value}
-                onBlur={() => field.handleBlur()}
-                onChange={field.handleChange}
-              >
-                <InputOTP.Group>
-                  <InputOTP.Slot index={0} />
-                  <InputOTP.Slot index={1} />
-                  <InputOTP.Slot index={2} />
-                </InputOTP.Group>
-                <InputOTP.Separator />
-                <InputOTP.Group>
-                  <InputOTP.Slot index={3} />
-                  <InputOTP.Slot index={4} />
-                  <InputOTP.Slot index={5} />
-                </InputOTP.Group>
-              </InputOTP>
-              {errorMessage ? <FieldError>{errorMessage}</FieldError> : null}
-            </div>
-          );
-        }}
-      </form.Field>
-
-      <form.Subscribe>
-        {(state: AnyFormState) => (
-          <Button
-            className="w-full"
-            isDisabled={state.isSubmitting}
-            type="submit"
-            variant="primary"
-          >
-            {state.isSubmitting ? "処理中..." : "認証コードを確認"}
-          </Button>
-        )}
-      </form.Subscribe>
-    </div>
   );
 }

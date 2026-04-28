@@ -1,6 +1,5 @@
 import type { AnyFieldMetaBase, AnyFormApi } from "@tanstack/react-form";
 import { Result } from "better-result";
-import { useState } from "react";
 
 import { sendMagicCode, signInWithMagicCode } from "~/features/auth/api/auth-client";
 import {
@@ -14,10 +13,11 @@ import { useAppForm } from "~/lib/forms/create-app-form";
 type UseCredentialsFormOptions = {
   mode: LoginMode;
   onSuccess: () => void;
+  step: LoginStep;
+  setStep: (step: LoginStep) => void;
 };
 
-export function useCredentialsForm({ mode, onSuccess }: UseCredentialsFormOptions) {
-  const [step, setStep] = useState<LoginStep>("credentials");
+export function useCredentialsForm({ mode, onSuccess, step, setStep }: UseCredentialsFormOptions) {
   const validationSchema = getLoginFormSchema(step, mode);
 
   const form = useAppForm({
@@ -62,7 +62,15 @@ export function useCredentialsForm({ mode, onSuccess }: UseCredentialsFormOption
         const afterSend = await afterPassword.andThenAsync(() => sendMagicCode(value.email));
 
         afterSend.match({
-          err: (e: Error) => setServerFieldError(formApi, "email", e.message),
+          err: (e: Error) => {
+            const userNamePrefix = "USERNAME_TAKEN:";
+
+            if (e.message.startsWith(userNamePrefix)) {
+              setServerFieldError(formApi, "username", e.message.slice(userNamePrefix.length));
+            } else {
+              setServerFieldError(formApi, "email", e.message);
+            }
+          },
           ok: () => setStep("magic-code"),
         });
         return;
@@ -96,7 +104,7 @@ function emptyFieldMetaBase(): AnyFieldMetaBase {
 }
 
 function clearServerFieldErrors(formApi: AnyFormApi) {
-  for (const field of ["email", "code"] as const) {
+  for (const field of ["email", "code", "username"] as const) {
     formApi.setFieldMeta(field, (prev: AnyFieldMetaBase | undefined) => ({
       ...emptyFieldMetaBase(),
       ...prev,
@@ -105,7 +113,11 @@ function clearServerFieldErrors(formApi: AnyFormApi) {
   }
 }
 
-function setServerFieldError(formApi: AnyFormApi, field: "code" | "email", message: string) {
+function setServerFieldError(
+  formApi: AnyFormApi,
+  field: "code" | "email" | "username",
+  message: string,
+) {
   formApi.setFieldMeta(field, (prev: AnyFieldMetaBase | undefined) => ({
     ...emptyFieldMetaBase(),
     ...prev,
