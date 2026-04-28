@@ -4,7 +4,7 @@ import { id } from "@instantdb/react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { db } from "~/db/instant";
-import { CurrentUserMenu } from "~/features/auth/components/current-user-chip";
+import { UserMenu } from "~/features/auth/components/user-menu";
 import { useCurrentUserProfile } from "~/features/auth/hooks/use-current-user-profile";
 import { useBoards } from "~/features/board/hooks/use-board";
 
@@ -20,9 +20,12 @@ function Home() {
   const boards = data?.boards ?? [];
 
   async function handleCreateBoard() {
-    if (!user?.id) return;
+    if (!user?.id) {
+      return;
+    }
 
     const boardId = id();
+
     await db.transact(
       db.tx.boards[boardId]!.update({
         createdAt: Date.now(),
@@ -47,17 +50,13 @@ function Home() {
           <h1 className="text-xl font-bold">アイデアボード</h1>
           <div className="flex items-center gap-2">
             {user ? (
-              <CurrentUserMenu
-                email={user.email}
-                imageUrl={user.imageURL}
-                username={profile?.username}
-              />
+              <UserMenu email={user.email} imageURL={user.imageURL} username={profile?.username} />
             ) : null}
             <Button
               className="h-10 px-4"
               size="sm"
               variant="primary"
-              onPress={() => void handleCreateBoard()}
+              onPress={() => handleCreateBoard()}
             >
               + 新しいボード
             </Button>

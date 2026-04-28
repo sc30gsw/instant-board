@@ -14,5 +14,5 @@ export function useCurrentUserProfile() {
     ...queryState,
     profile: data?.$users[0] ?? null,
     user,
-  };
+  } as const;
 }

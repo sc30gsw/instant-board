@@ -1,9 +1,6 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 
-import { loginFormEmptyValues } from "~/features/auth/schemas/login-schema";
-
-export const { fieldContext, formContext, useFieldContext, useFormContext } =
-  createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 export const { useAppForm } = createFormHook({
   fieldComponents: {},
@@ -11,5 +8,3 @@ export const { useAppForm } = createFormHook({
   formComponents: {},
   formContext,
 });
-
-export { loginFormEmptyValues };

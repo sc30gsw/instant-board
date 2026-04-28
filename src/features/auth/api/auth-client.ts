@@ -1,8 +1,9 @@
 import { Result } from "better-result";
 
 import { db } from "~/db/instant";
+import type { LoginFormValue } from "~/features/auth/schemas/login-schema";
 
-export function sendMagicCode(email: string) {
+export function sendMagicCode(email: LoginFormValue["email"]) {
   return Result.tryPromise({
     catch: (e) => e as Error,
     try: () => db.auth.sendMagicCode({ email }),
@@ -10,9 +11,9 @@ export function sendMagicCode(email: string) {
 }
 
 export function signInWithMagicCode(
-  email: string,
-  code: string,
-  extraFields?: { username?: string },
+  email: LoginFormValue["email"],
+  code: LoginFormValue["code"],
+  extraFields?: Partial<Pick<LoginFormValue, "username">>,
 ) {
   return Result.tryPromise({
     catch: (e) => e as Error,

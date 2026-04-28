@@ -1,94 +1,39 @@
-import { Button, FieldError, Input, Label, TextField } from "@heroui/react";
-import { useState } from "react";
+import { Button, Input } from "@heroui/react";
+import type { AnyFormState } from "@tanstack/react-form";
+import { getRouteApi } from "@tanstack/react-router";
+import type { useTransition } from "react";
 
-import { sendMagicCode, signInWithMagicCode } from "~/features/auth/api/auth-client";
-import {
-  signupWithPasswordServer,
-  signinWithPasswordServer,
-} from "~/features/auth/api/credential-server";
-import { useAppForm } from "~/features/auth/hooks/create-login-form";
-import {
-  getLoginFormValidationError,
-  loginFormEmptyValues,
-} from "~/features/auth/schemas/login-schema";
-import type { LoginMode, LoginStep } from "~/features/auth/schemas/login-schema";
+import { useCredentialsForm } from "~/features/auth/hooks/use-credentials-form";
+import type { LoginFormValue } from "~/features/auth/schemas/login-schema";
 
-type Props = {
-  mode: LoginMode;
-  onModeChange: (mode: LoginMode) => void;
+function getCredentialsFieldErrorMessage(error: unknown) {
+  if (!error) {
+    return null;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+
+  return null;
+}
+
+const routeApi = getRouteApi("/auth/login");
+
+type CredentialsFormProps = {
+  isPending: ReturnType<typeof useTransition>[0];
   onSuccess: () => void;
 };
 
-export function CredentialsForm({ mode, onModeChange, onSuccess }: Props) {
-  const [step, setStep] = useState<LoginStep>("credentials");
-  const [serverError, setServerError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false);
+export function CredentialsForm({ isPending, onSuccess }: CredentialsFormProps) {
+  const { mode } = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
 
-  const form = useAppForm({
-    defaultValues: loginFormEmptyValues,
-    validators: {
-      onSubmit: ({ value }) => getLoginFormValidationError(step, value, mode),
-    },
-    onSubmit: async ({ value }) => {
-      setServerError(undefined);
-      setIsLoading(true);
-
-      if (step === "credentials") {
-        try {
-          if (mode === "signup") {
-            await signupWithPasswordServer({
-              data: {
-                email: value.email,
-                password: value.password,
-                username: value.username,
-              },
-            });
-          } else {
-            await signinWithPasswordServer({
-              data: { email: value.email, password: value.password },
-            });
-          }
-
-          const codeResult = await sendMagicCode(value.email);
-          await codeResult.match({
-            err: async (e) => {
-              setServerError(e.message);
-              setIsLoading(false);
-            },
-            ok: async () => {
-              setStep("magic-code");
-              setIsLoading(false);
-            },
-          });
-        } catch (e) {
-          setServerError(e instanceof Error ? e.message : "エラーが発生しました");
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      // Step 2: メールに届いた6桁コードで実際に認証する
-      try {
-        const codeResult = await signInWithMagicCode(
-          value.email,
-          value.code,
-          mode === "signup" ? { username: value.username } : undefined,
-        );
-        await codeResult.match({
-          err: async (e) => {
-            setServerError(e.message);
-            setIsLoading(false);
-          },
-          ok: async () => {
-            onSuccess();
-          },
-        });
-      } catch (e) {
-        setServerError(e instanceof Error ? e.message : "エラーが発生しました");
-        setIsLoading(false);
-      }
-    },
-  });
+  const { form, step } = useCredentialsForm({ mode, onSuccess });
 
   return (
     <form
@@ -103,90 +48,103 @@ export function CredentialsForm({ mode, onModeChange, onSuccess }: Props) {
           {mode === "signup" && (
             <form.Field name="username">
               {(field) => (
-                <TextField
-                  className="flex flex-col gap-1"
-                  isInvalid={field.state.meta.errors.length > 0}
-                  value={field.state.value}
-                  onChange={field.handleChange}
-                >
-                  <Label className="text-sm font-medium">ユーザー名</Label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium" htmlFor="username">
+                    ユーザー名
+                  </label>
                   <Input
+                    id="username"
+                    aria-invalid={field.state.meta.errors.length > 0}
                     className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
                     placeholder="your-username"
+                    disabled={isPending}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                   />
-                  <FieldError className="text-danger text-xs">
-                    {field.state.meta.errors[0]}
-                  </FieldError>
-                </TextField>
+                  <p className="text-danger text-xs">
+                    {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
+                  </p>
+                </div>
               )}
             </form.Field>
           )}
 
           <form.Field name="email">
             {(field) => (
-              <TextField
-                className="flex flex-col gap-1"
-                isInvalid={field.state.meta.errors.length > 0}
-                value={field.state.value}
-                onChange={field.handleChange}
-              >
-                <Label className="text-sm font-medium">メールアドレス</Label>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="email">
+                  メールアドレス
+                </label>
                 <Input
+                  id="email"
+                  aria-invalid={field.state.meta.errors.length > 0}
                   className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
                   placeholder="you@example.com"
                   type="email"
+                  disabled={isPending}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                 />
-                <FieldError className="text-danger text-xs">
-                  {field.state.meta.errors[0]}
-                </FieldError>
-              </TextField>
+                <p className="text-danger text-xs">
+                  {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
+                </p>
+              </div>
             )}
           </form.Field>
 
           <form.Field name="password">
             {(field) => (
-              <TextField
-                className="flex flex-col gap-1"
-                isInvalid={field.state.meta.errors.length > 0}
-                value={field.state.value}
-                onChange={field.handleChange}
-              >
-                <Label className="text-sm font-medium">パスワード</Label>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="password">
+                  パスワード
+                </label>
                 <Input
+                  id="password"
+                  aria-invalid={field.state.meta.errors.length > 0}
                   className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
                   placeholder="8文字以上"
                   type="password"
+                  disabled={isPending}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                 />
-                <FieldError className="text-danger text-xs">
-                  {field.state.meta.errors[0]}
-                </FieldError>
-              </TextField>
+                <p className="text-danger text-xs">
+                  {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
+                </p>
+              </div>
             )}
           </form.Field>
 
-          <Button className="w-full" isDisabled={isLoading} type="submit" variant="primary">
-            {isLoading ? "処理中..." : mode === "signup" ? "アカウント作成" : "サインイン"}
-          </Button>
+          <form.Subscribe>
+            {(state: AnyFormState) => (
+              <Button
+                className="w-full"
+                disabled={isPending || state.isSubmitting}
+                type="submit"
+                variant="primary"
+              >
+                {state.isSubmitting
+                  ? "処理中..."
+                  : mode === "signup"
+                    ? "アカウント作成"
+                    : "サインイン"}
+              </Button>
+            )}
+          </form.Subscribe>
         </>
       ) : (
-        <MagicCodeStep
-          email={form.getFieldValue("email")}
-          form={form}
-          isLoading={isLoading}
-          onSuccess={onSuccess}
-        />
+        <MagicCodeStep email={form.getFieldValue("email")} form={form} />
       )}
-
-      {serverError && <p className="text-danger text-sm">{serverError}</p>}
 
       {step === "credentials" && (
         <button
           className="text-foreground-500 text-center text-sm hover:underline"
           type="button"
-          onClick={() => onModeChange(mode === "signin" ? "signup" : "signin")}
+          disabled={isPending}
+          onClick={() => navigate({ search: { mode: mode === "signin" ? "signup" : "signin" } })}
         >
           {mode === "signin"
             ? "アカウントをお持ちでない方はこちら"
@@ -198,15 +156,11 @@ export function CredentialsForm({ mode, onModeChange, onSuccess }: Props) {
 }
 
 type MagicCodeStepProps = {
-  email: string;
-  // biome-ignore lint: form type is complex
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any;
-  isLoading: boolean;
-  onSuccess: () => void;
+  email: LoginFormValue["email"];
+  form: ReturnType<typeof useCredentialsForm>["form"];
 };
 
-function MagicCodeStep({ email, form, isLoading, onSuccess: _ }: MagicCodeStepProps) {
+function MagicCodeStep({ email, form }: MagicCodeStepProps) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-foreground-500 text-sm">
@@ -216,27 +170,39 @@ function MagicCodeStep({ email, form, isLoading, onSuccess: _ }: MagicCodeStepPr
 
       <form.Field name="code">
         {(field: any) => (
-          <TextField
-            className="flex flex-col gap-1"
-            isInvalid={field.state.meta.errors.length > 0}
-            value={field.state.value}
-            onChange={field.handleChange}
-          >
-            <Label className="text-sm font-medium">認証コード</Label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium" htmlFor="code">
+              認証コード
+            </label>
             <Input
+              id="code"
+              aria-invalid={field.state.meta.errors.length > 0}
               className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
               maxLength={6}
               placeholder="000000"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
             />
-            <FieldError className="text-danger text-xs">{field.state.meta.errors[0]}</FieldError>
-          </TextField>
+            <p className="text-danger text-xs">
+              {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
+            </p>
+          </div>
         )}
       </form.Field>
 
-      <Button className="w-full" isDisabled={isLoading} type="submit" variant="primary">
-        {isLoading ? "処理中..." : "認証コードを確認"}
-      </Button>
+      <form.Subscribe>
+        {(state: AnyFormState) => (
+          <Button
+            className="w-full"
+            isDisabled={state.isSubmitting}
+            type="submit"
+            variant="primary"
+          >
+            {state.isSubmitting ? "処理中..." : "認証コードを確認"}
+          </Button>
+        )}
+      </form.Subscribe>
     </div>
   );
 }

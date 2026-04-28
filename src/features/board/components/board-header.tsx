@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { db } from "~/db/instant";
-import { CurrentUserMenu } from "~/features/auth/components/current-user-chip";
+import { UserMenu } from "~/features/auth/components/user-menu";
 import type { BoardWithNotes } from "~/features/board/types/board";
 
 type Props = {
@@ -106,7 +106,7 @@ export function BoardHeader({ board, currentUsername, onDeleteBoard, user }: Pro
 
       <div className="flex items-center gap-2">
         {user ? (
-          <CurrentUserMenu email={user.email} imageUrl={user.imageURL} username={currentUsername} />
+          <UserMenu email={user.email} imageURL={user.imageURL} username={currentUsername} />
         ) : null}
 
         <Button className="h-10 px-4" size="sm" variant="outline" onPress={handleCopyLink}>

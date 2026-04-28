@@ -18,51 +18,44 @@ const magicCodeSchema = v.pipe(v.string(), v.length(6, "認証コードは6桁�
 export type LoginMode = "signin" | "signup";
 export type LoginStep = "credentials" | "magic-code";
 
-export type LoginFormValue = {
-  email: v.InferOutput<typeof emailSchema>;
-  password: v.InferOutput<typeof passwordSchema>;
-  username?: v.InferOutput<typeof usernameSchema>;
-  code: v.InferOutput<typeof magicCodeSchema>;
-};
+const loginFormSchema = v.object({
+  code: magicCodeSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  username: usernameSchema,
+});
 
-export function getLoginFormValidationError(
-  step: LoginStep,
-  value: LoginFormValue,
-  mode: LoginMode,
-) {
-  if (step === "credentials") {
-    const fields: Record<string, string | undefined> = {};
+export type LoginFormValue = v.InferOutput<typeof loginFormSchema>;
 
-    const emailResult = v.safeParse(emailSchema, value.email);
+const passthroughStringSchema = v.string();
 
-    if (!emailResult.success) {
-      fields["email"] = emailResult.issues[0]?.message;
-    }
+export const signinCredentialsSchema = v.object({
+  code: passthroughStringSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  username: passthroughStringSchema,
+});
 
-    const passwordResult = v.safeParse(passwordSchema, value.password);
+export const signupCredentialsSchema = v.object({
+  code: passthroughStringSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  username: usernameSchema,
+});
 
-    if (!passwordResult.success) {
-      fields["password"] = passwordResult.issues[0]?.message;
-    }
+const magicCodeStepSchema = v.object({
+  code: magicCodeSchema,
+  email: passthroughStringSchema,
+  password: passthroughStringSchema,
+  username: passthroughStringSchema,
+});
 
-    if (mode === "signup") {
-      const usernameResult = v.safeParse(usernameSchema, value.username);
-
-      if (!usernameResult.success) {
-        fields["username"] = usernameResult.issues[0]?.message;
-      }
-    }
-
-    return Object.keys(fields).length > 0 ? { fields } : undefined;
+export function getLoginFormSchema(step: LoginStep, mode: LoginMode) {
+  if (step === "magic-code") {
+    return magicCodeStepSchema;
   }
 
-  const codeResult = v.safeParse(magicCodeSchema, value.code);
-
-  if (!codeResult.success) {
-    return { fields: { code: codeResult.issues[0]?.message } };
-  }
-
-  return undefined;
+  return mode === "signup" ? signupCredentialsSchema : signinCredentialsSchema;
 }
 
 export const loginFormEmptyValues = {
@@ -70,4 +63,4 @@ export const loginFormEmptyValues = {
   email: "",
   password: "",
   username: "",
-} as const satisfies LoginFormValue;
+} satisfies LoginFormValue;
