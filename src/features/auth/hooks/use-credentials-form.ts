@@ -62,12 +62,7 @@ export function useCredentialsForm({ mode, onSuccess }: UseCredentialsFormOption
         const afterSend = await afterPassword.andThenAsync(() => sendMagicCode(value.email));
 
         afterSend.match({
-          err: (e) =>
-            setServerFieldError(
-              formApi,
-              "email",
-              e instanceof Error ? e.message : "コードの送信に失敗しました。",
-            ),
+          err: (e: Error) => setServerFieldError(formApi, "email", e.message),
           ok: () => setStep("magic-code"),
         });
         return;
@@ -80,12 +75,7 @@ export function useCredentialsForm({ mode, onSuccess }: UseCredentialsFormOption
       );
 
       signedIn.match({
-        err: (e) =>
-          setServerFieldError(
-            formApi,
-            "code",
-            e instanceof Error ? e.message : "サインインに失敗しました。コードを確認してください。",
-          ),
+        err: (e: Error) => setServerFieldError(formApi, "code", e.message),
         ok: () => onSuccess(),
       });
     },

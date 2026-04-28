@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import { cn } from "@lightsound/cn/tw-merge";
 import type { useTransition } from "react";
 
 import { db } from "~/db/instant";
@@ -14,8 +15,11 @@ export function GoogleSignInButton({
   return (
     <a
       href={url}
-      disabled={isPending}
-      className="button button-outline bg-background inline-flex w-full items-center justify-center gap-2 rounded-full border hover:opacity-80 disabled:opacity-50"
+      aria-disabled={isPending}
+      className={cn(
+        "bg-background inline-flex w-full items-center justify-center gap-2 rounded-full border hover:opacity-80",
+        isPending && "pointer-events-none opacity-50",
+      )}
     >
       <Icon height={20} icon="mdi:google" width={20} />
       <span>Google でサインイン</span>

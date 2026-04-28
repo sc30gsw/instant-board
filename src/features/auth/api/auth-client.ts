@@ -5,7 +5,7 @@ import type { LoginFormValue } from "~/features/auth/schemas/login-schema";
 
 export function sendMagicCode(email: LoginFormValue["email"]) {
   return Result.tryPromise({
-    catch: (e) => e as Error,
+    catch: (e: unknown) => (e instanceof Error ? e : new Error(String(e))),
     try: () => db.auth.sendMagicCode({ email }),
   });
 }
@@ -16,7 +16,7 @@ export function signInWithMagicCode(
   extraFields?: Partial<Pick<LoginFormValue, "username">>,
 ) {
   return Result.tryPromise({
-    catch: (e) => e as Error,
+    catch: (e: unknown) => (e instanceof Error ? e : new Error(String(e))),
     try: () =>
       db.auth.signInWithMagicCode({
         code,

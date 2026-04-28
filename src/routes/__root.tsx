@@ -1,6 +1,5 @@
-import { RouterProvider } from "@heroui/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { HeadContent, Outlet, Scripts, createRootRoute, useRouter } from "@tanstack/react-router";
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 
@@ -34,8 +33,6 @@ export const Route = createRootRoute({
 });
 
 function RootDocument() {
-  const router = useRouter();
-
   useEffect(() => {
     if (import.meta.env.DEV) {
       void import("react-grab");
@@ -48,21 +45,19 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <RouterProvider navigate={(to: string) => void router.navigate({ to })}>
-          <Outlet />
-          <TanStackDevtools
-            config={{
-              position: "bottom-right",
-            }}
-            plugins={[
-              {
-                name: "Tanstack Router",
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-          <Scripts />
-        </RouterProvider>
+        <Outlet />
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+        <Scripts />
       </body>
     </html>
   );

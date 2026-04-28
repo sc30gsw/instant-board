@@ -34,7 +34,7 @@ export function LoginFormsContainer() {
       <GoogleSignInButton isPending={isPending} />
 
       <Button
-        disabled={isPending}
+        isDisabled={isPending}
         className="w-full"
         variant="ghost"
         onPress={() =>
