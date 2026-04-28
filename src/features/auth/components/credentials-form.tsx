@@ -1,7 +1,14 @@
-import { Button, Input } from "@heroui/react";
+import {
+  Button,
+  FieldError,
+  Input,
+  InputOTP,
+  Label,
+  REGEXP_ONLY_DIGITS,
+  TextField,
+} from "@heroui/react";
 import type { AnyFormState } from "@tanstack/react-form";
 import { getRouteApi } from "@tanstack/react-router";
-import type { useTransition } from "react";
 
 import { useCredentialsForm } from "~/features/auth/hooks/use-credentials-form";
 import type { LoginFormValue } from "~/features/auth/schemas/login-schema";
@@ -25,7 +32,7 @@ function getCredentialsFieldErrorMessage(error: unknown) {
 const routeApi = getRouteApi("/auth/login");
 
 type CredentialsFormProps = {
-  isPending: ReturnType<typeof useTransition>[0];
+  isPending: boolean;
   onSuccess: () => void;
 };
 
@@ -47,82 +54,76 @@ export function CredentialsForm({ isPending, onSuccess }: CredentialsFormProps) 
         <>
           {mode === "signup" && (
             <form.Field name="username">
-              {(field) => (
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium" htmlFor="username">
-                    ユーザー名
-                  </label>
-                  <Input
-                    id="username"
-                    aria-invalid={field.state.meta.errors.length > 0}
-                    className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
-                    placeholder="your-username"
-                    disabled={isPending}
+              {(field) => {
+                const errorMessage = getCredentialsFieldErrorMessage(field.state.meta.errors[0]);
+                return (
+                  <TextField
+                    fullWidth
+                    isDisabled={isPending}
+                    isInvalid={field.state.meta.errors.length > 0}
+                    name={field.name}
                     value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                  />
-                  <p className="text-danger text-xs">
-                    {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
-                  </p>
-                </div>
-              )}
+                    onBlur={() => field.handleBlur()}
+                    onChange={field.handleChange}
+                  >
+                    <Label>ユーザー名</Label>
+                    <Input placeholder="your-username" />
+                    {errorMessage ? <FieldError>{errorMessage}</FieldError> : null}
+                  </TextField>
+                );
+              }}
             </form.Field>
           )}
 
           <form.Field name="email">
-            {(field) => (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium" htmlFor="email">
-                  メールアドレス
-                </label>
-                <Input
-                  id="email"
-                  aria-invalid={field.state.meta.errors.length > 0}
-                  className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
-                  placeholder="you@example.com"
+            {(field) => {
+              const errorMessage = getCredentialsFieldErrorMessage(field.state.meta.errors[0]);
+              return (
+                <TextField
+                  fullWidth
+                  isDisabled={isPending}
+                  isInvalid={field.state.meta.errors.length > 0}
+                  name={field.name}
                   type="email"
-                  disabled={isPending}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                />
-                <p className="text-danger text-xs">
-                  {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
-                </p>
-              </div>
-            )}
+                  onBlur={() => field.handleBlur()}
+                  onChange={field.handleChange}
+                >
+                  <Label>メールアドレス</Label>
+                  <Input inputMode="email" placeholder="you@example.com" />
+                  {errorMessage ? <FieldError>{errorMessage}</FieldError> : null}
+                </TextField>
+              );
+            }}
           </form.Field>
 
           <form.Field name="password">
-            {(field) => (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium" htmlFor="password">
-                  パスワード
-                </label>
-                <Input
-                  id="password"
-                  aria-invalid={field.state.meta.errors.length > 0}
-                  className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
-                  placeholder="8文字以上"
+            {(field) => {
+              const errorMessage = getCredentialsFieldErrorMessage(field.state.meta.errors[0]);
+              return (
+                <TextField
+                  fullWidth
+                  isDisabled={isPending}
+                  isInvalid={field.state.meta.errors.length > 0}
+                  name={field.name}
                   type="password"
-                  disabled={isPending}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                />
-                <p className="text-danger text-xs">
-                  {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
-                </p>
-              </div>
-            )}
+                  onBlur={() => field.handleBlur()}
+                  onChange={field.handleChange}
+                >
+                  <Label>パスワード</Label>
+                  <Input placeholder="8文字以上" />
+                  {errorMessage ? <FieldError>{errorMessage}</FieldError> : null}
+                </TextField>
+              );
+            }}
           </form.Field>
 
           <form.Subscribe>
             {(state: AnyFormState) => (
               <Button
                 className="w-full"
-                disabled={isPending || state.isSubmitting}
+                isDisabled={isPending || state.isSubmitting}
                 type="submit"
                 variant="primary"
               >
@@ -169,26 +170,37 @@ function MagicCodeStep({ email, form }: MagicCodeStepProps) {
       </p>
 
       <form.Field name="code">
-        {(field: any) => (
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium" htmlFor="code">
-              認証コード
-            </label>
-            <Input
-              id="code"
-              aria-invalid={field.state.meta.errors.length > 0}
-              className="rounded-medium border-default-200 focus:border-primary w-full border px-3 py-2 text-sm outline-none"
-              maxLength={6}
-              placeholder="000000"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-            />
-            <p className="text-danger text-xs">
-              {getCredentialsFieldErrorMessage(field.state.meta.errors[0])}
-            </p>
-          </div>
-        )}
+        {(field) => {
+          const errorMessage = getCredentialsFieldErrorMessage(field.state.meta.errors[0]);
+          return (
+            <div className="flex w-full flex-col gap-2">
+              <Label>認証コード</Label>
+              <InputOTP
+                className="w-full"
+                isInvalid={field.state.meta.errors.length > 0}
+                maxLength={6}
+                name={field.name}
+                pattern={REGEXP_ONLY_DIGITS}
+                value={field.state.value}
+                onBlur={() => field.handleBlur()}
+                onChange={field.handleChange}
+              >
+                <InputOTP.Group>
+                  <InputOTP.Slot index={0} />
+                  <InputOTP.Slot index={1} />
+                  <InputOTP.Slot index={2} />
+                </InputOTP.Group>
+                <InputOTP.Separator />
+                <InputOTP.Group>
+                  <InputOTP.Slot index={3} />
+                  <InputOTP.Slot index={4} />
+                  <InputOTP.Slot index={5} />
+                </InputOTP.Group>
+              </InputOTP>
+              {errorMessage ? <FieldError>{errorMessage}</FieldError> : null}
+            </div>
+          );
+        }}
       </form.Field>
 
       <form.Subscribe>
