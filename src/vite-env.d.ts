@@ -5,9 +5,15 @@ interface ViteTypeOptions {
 }
 
 interface ImportMetaEnv {
+  readonly DEV: boolean;
   readonly VITE_INSTANT_APP_ID: string;
   readonly VITE_INSTANT_APP_ADMIN_TOKEN: string;
-  // その他の環境変数...
+  readonly VITE_INSTANT_GOOGLE_CLIENT_NAME?: string;
+}
+
+declare module "*?url" {
+  const src: string;
+  export default src;
 }
 
 interface ImportMeta {

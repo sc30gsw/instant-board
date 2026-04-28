@@ -37,16 +37,16 @@ vp dev
 
 主に以下のライブラリで開発しています（`dependencies` / `devDependencies` は [package.json](./package.json) を正とする）。
 
-| カテゴリ               | 技術                                                                                                                                                                                                                                  |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| フレームワーク         | [TanStack Start](https://tanstack.com/start) / [React 19](https://react.dev) + [React Compiler](https://react.dev/learn/react-compiler)（[`babel-plugin-react-compiler`](https://www.npmjs.com/package/babel-plugin-react-compiler)） |
-| ランタイム/ビルド      | [Vite+](https://viteplus.dev)（`vp` CLI、`vite` は `@voidzero-dev/vite-plus-core` 経由）                                                                                                                                              |
-| ルーティング           | [TanStack Router](https://tanstack.com/router)（file-based）                                                                                                                                                                          |
-| 永続化                 | [InstantDB](https://www.instantdb.com)（`instant-cli` 経由でスキーマ管理）。スキーマ: `src/db/instant-schema.ts`、パーミッション: `src/db/instant.perms.ts`                                                                           |
-| UI / スタイル          | [Tailwind CSS v4](https://tailwindcss.com)（`@tailwindcss/vite`）/ [`@lightsound/cn`](https://github.com/lightsoundco/cn) + [`tailwind-merge`](https://github.com/dcastil/tailwind-merge)                                             |
-| エラーハンドリング     | [better-result](https://github.com/dmmulroy/better-result)                                                                                                                                                                            |
-| テスト                 | [Vitest](https://vitest.dev)（Vite+ バンドルに同梱されたランナー経由。`overrides` は `package.json` の `pnpm` を参照）                                                                                                                |
-| 補助ツール（開発）     | [fallow](https://github.com/fallow-rs/fallow) / [react-doctor](https://github.com/millionco/react-doctor) / [react-grab](https://github.com/aidenybai/react-grab) ほか [package.json](./package.json) 参照                            |
+| カテゴリ           | 技術                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| フレームワーク     | [TanStack Start](https://tanstack.com/start) / [React 19](https://react.dev) + [React Compiler](https://react.dev/learn/react-compiler)（[`babel-plugin-react-compiler`](https://www.npmjs.com/package/babel-plugin-react-compiler)） |
+| ランタイム/ビルド  | [Vite+](https://viteplus.dev)（`vp` CLI、`vite` は `@voidzero-dev/vite-plus-core` 経由）                                                                                                                                              |
+| ルーティング       | [TanStack Router](https://tanstack.com/router)（file-based）                                                                                                                                                                          |
+| 永続化             | [InstantDB](https://www.instantdb.com)（`instant-cli` 経由でスキーマ管理）。スキーマ: `src/db/instant-schema.ts`、パーミッション: `src/db/instant.perms.ts`                                                                           |
+| UI / スタイル      | [Tailwind CSS v4](https://tailwindcss.com)（`@tailwindcss/vite`）/ [`@lightsound/cn`](https://github.com/lightsoundco/cn) + [`tailwind-merge`](https://github.com/dcastil/tailwind-merge)                                             |
+| エラーハンドリング | [better-result](https://github.com/dmmulroy/better-result)                                                                                                                                                                            |
+| テスト             | [Vitest](https://vitest.dev)（Vite+ バンドルに同梱されたランナー経由。`overrides` は `package.json` の `pnpm` を参照）                                                                                                                |
+| 補助ツール（開発） | [fallow](https://github.com/fallow-rs/fallow) / [react-doctor](https://github.com/millionco/react-doctor) / [react-grab](https://github.com/aidenybai/react-grab) ほか [package.json](./package.json) 参照                            |
 
 `packageManager` は [Corepack](https://nodejs.org/api/corepack.html) 用に **`pnpm@10.32.1`**（`package.json` 記載）。Vite+ が pnpm を使う想定のため、依存操作は原則 **`vp install` / `vp add` / `vp remove`（経由: pnpm）** とし、**npm / yarn 直叩きはしない**方針です（[CLAUDE.md](./CLAUDE.md) と同趣旨）。
 
@@ -206,20 +206,20 @@ Vite+ (`vp`) を通じてすべての操作を行います。`pnpm`・`npm`・`y
 
 次表は、よく使う Vite+ コマンドと、**[package.json](./package.json) の `scripts` に定義してある**コマンドです。`vp` にないタスクは `vp run <script名>` です（`dev` など衝突時の公式回避）。
 
-| コマンド                      | 内容                                                                                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp install`                  | 依存インストール（`pnpm` 相当）                                                                                                       |
-| `vp dev`                      | 開発サーバー起動                                                                                                                      |
-| `vp build`                    | 本番ビルド（`package.json` の `build`）                                                                                               |
-| `vp preview`                  | プレビュー（`package.json` の `preview`）                                                                                             |
-| `vp check` / `vp check --fix` | リント + 整形 + 型（`package.json` の `check` / `fix`）                                                                               |
-| `vp lint`                     | oxlint のみ                                                                                                                           |
-| `vp test`                     | テスト（`package.json` の `test`）                                                                                                    |
-| `vp run check:skills`         | `npx @tanstack/intent@latest list`（同梱スキル一覧。`package.json` の `check:skills`）                                                |
-| `vp run instant:push-schema`  | `instant-cli` で Instant スキーマを push（`INSTANT_SCHEMA_FILE_PATH=src/db/instant-schema.ts` 指定済み。要 `npx instant-cli login`）  |
-| `vp run instant:push-perms`   | `instant-cli` で Instant パーミッションを push（`INSTANT_PERMS_FILE_PATH=src/db/instant.perms.ts` 指定済み）                          |
-| `vp run fallow` ほか          | 未使用・監査等（`fallow:*` 系。`package.json` 参照）                                                                                  |
-| `vp run doctor`               | `react-doctor`（`package.json` の `doctor`）                                                                                          |
+| コマンド                      | 内容                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `vp install`                  | 依存インストール（`pnpm` 相当）                                                                                                      |
+| `vp dev`                      | 開発サーバー起動                                                                                                                     |
+| `vp build`                    | 本番ビルド（`package.json` の `build`）                                                                                              |
+| `vp preview`                  | プレビュー（`package.json` の `preview`）                                                                                            |
+| `vp check` / `vp check --fix` | リント + 整形 + 型（`package.json` の `check` / `fix`）                                                                              |
+| `vp lint`                     | oxlint のみ                                                                                                                          |
+| `vp test`                     | テスト（`package.json` の `test`）                                                                                                   |
+| `vp run check:skills`         | `npx @tanstack/intent@latest list`（同梱スキル一覧。`package.json` の `check:skills`）                                               |
+| `vp run instant:push-schema`  | `instant-cli` で Instant スキーマを push（`INSTANT_SCHEMA_FILE_PATH=src/db/instant-schema.ts` 指定済み。要 `npx instant-cli login`） |
+| `vp run instant:push-perms`   | `instant-cli` で Instant パーミッションを push（`INSTANT_PERMS_FILE_PATH=src/db/instant.perms.ts` 指定済み）                         |
+| `vp run fallow` ほか          | 未使用・監査等（`fallow:*` 系。`package.json` 参照）                                                                                 |
+| `vp run doctor`               | `react-doctor`（`package.json` の `doctor`）                                                                                         |
 
 ## 開発者ツール
 
