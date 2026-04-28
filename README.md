@@ -25,7 +25,7 @@
 
 ```bash
 git clone <このリポジトリのURL>
-cd tanstack-start-poc-with-harness
+cd instant-board
 # .env を用意し VITE_INSTANT_APP_ID 等を設定（Instant を使う場合）
 vp install
 vp dev
