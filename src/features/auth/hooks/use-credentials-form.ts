@@ -24,7 +24,7 @@ export function useCredentialsForm({ mode, onSuccess, step, setStep }: UseCreden
     defaultValues: loginFormEmptyValues,
     listeners: {
       onChange: ({ fieldApi }) => {
-        if (fieldApi.name === "email" || fieldApi.name === "code") {
+        if (fieldApi.name === "email" || fieldApi.name === "code" || fieldApi.name === "username") {
           fieldApi.setMeta((prev) => ({
             ...prev,
             errorMap: { ...prev.errorMap, onServer: undefined },
