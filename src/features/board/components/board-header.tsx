@@ -106,7 +106,11 @@ export function BoardHeader({ board, currentUsername, onDeleteBoard, user }: Pro
 
       <div className="flex items-center gap-2">
         {user ? (
-          <UserMenu email={user.email} imageURL={user.imageURL} username={currentUsername ?? undefined} />
+          <UserMenu
+            email={user.email}
+            imageURL={user.imageURL}
+            username={currentUsername ?? undefined}
+          />
         ) : null}
 
         <Button className="h-10 px-4" size="sm" variant="outline" onPress={handleCopyLink}>
