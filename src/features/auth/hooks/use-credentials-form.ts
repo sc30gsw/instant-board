@@ -23,11 +23,19 @@ export function useCredentialsForm({ mode, onSuccess, step, setStep }: UseCreden
   const form = useAppForm({
     defaultValues: loginFormEmptyValues,
     listeners: {
-      onChange: ({ fieldApi }) => {
+      onChange: ({ formApi, fieldApi }) => {
         if (fieldApi.name === "email" || fieldApi.name === "code" || fieldApi.name === "username") {
           fieldApi.setMeta((prev) => ({
             ...prev,
             errorMap: { ...prev.errorMap, onServer: undefined },
+          }));
+        }
+        
+        if (fieldApi.name === "password") {
+          formApi.setFieldMeta("email", (prev: AnyFieldMetaBase | undefined) => ({
+            ...emptyFieldMetaBase(),
+            ...prev,
+            errorMap: { ...prev?.errorMap, onServer: undefined },
           }));
         }
       },
