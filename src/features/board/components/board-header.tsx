@@ -1,11 +1,12 @@
 import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import type { User } from "@instantdb/react";
+import type { AnyFormState } from "@tanstack/react-form";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { db } from "~/db/instant";
 import { UserMenu } from "~/features/auth/components/user-menu";
+import { useBoardTitleForm } from "~/features/board/hooks/use-board-title-form";
 import type { BoardWithNotes } from "~/features/board/types/board";
 
 type Props = {
@@ -15,41 +16,70 @@ type Props = {
   user: User | null;
 };
 
+type BoardTitleEditorProps = {
+  board: Pick<BoardWithNotes, "id" | "title">;
+  onDone: () => void;
+};
+
+function BoardTitleEditor({ board, onDone }: BoardTitleEditorProps) {
+  const { form } = useBoardTitleForm({ board, onDone });
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void form.handleSubmit();
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <form.Field name="title">
+          {(field) => (
+            <div className="flex flex-col">
+              <input
+                ref={inputRef}
+                className="border-foreground-400 rounded border bg-transparent px-2 py-1 text-lg font-semibold outline-none"
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") onDone();
+                }}
+              />
+              {field.state.meta.errors.length > 0 && (
+                <span className="text-danger text-xs">
+                  {field.state.meta.errors[0]?.toString()}
+                </span>
+              )}
+            </div>
+          )}
+        </form.Field>
+        <form.Subscribe>
+          {(state: AnyFormState) => (
+            <Button isDisabled={state.isSubmitting} size="sm" type="submit" variant="secondary">
+              保存
+            </Button>
+          )}
+        </form.Subscribe>
+        <Button size="sm" type="button" variant="ghost" onPress={onDone}>
+          キャンセル
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export function BoardHeader({ board, currentUsername, onDeleteBoard, user }: Props) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [titleInput, setTitleInput] = useState(board.title);
-  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const canEdit = user != null && board.owner?.id === user.id;
 
-  useEffect(() => {
-    if (isEditingTitle) titleInputRef.current?.focus();
-  }, [isEditingTitle]);
-
-  useEffect(() => {
-    setTitleInput(board.title);
-  }, [board.title]);
-
   function handleStartEditTitle() {
     if (!canEdit) return;
-    setTitleInput(board.title);
     setIsEditingTitle(true);
-  }
-
-  async function handleTitleSave() {
-    const trimmed = titleInput.trim();
-    if (trimmed && trimmed !== board.title) {
-      await db.transact(db.tx.boards[board.id]!.update({ title: trimmed }));
-    }
-    if (!trimmed) {
-      setTitleInput(board.title);
-    }
-    setIsEditingTitle(false);
-  }
-
-  function handleTitleCancel() {
-    setTitleInput(board.title);
-    setIsEditingTitle(false);
   }
 
   function handleCopyLink() {
@@ -64,24 +94,7 @@ export function BoardHeader({ board, currentUsername, onDeleteBoard, user }: Pro
         </Link>
 
         {isEditingTitle ? (
-          <div className="flex items-center gap-2">
-            <input
-              ref={titleInputRef}
-              className="border-foreground-400 rounded border bg-transparent px-2 py-1 text-lg font-semibold outline-none"
-              value={titleInput}
-              onChange={(e) => setTitleInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void handleTitleSave();
-                if (e.key === "Escape") handleTitleCancel();
-              }}
-            />
-            <Button size="sm" variant="secondary" onPress={() => void handleTitleSave()}>
-              保存
-            </Button>
-            <Button size="sm" variant="ghost" onPress={handleTitleCancel}>
-              キャンセル
-            </Button>
-          </div>
+          <BoardTitleEditor board={board} onDone={() => setIsEditingTitle(false)} />
         ) : (
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold">{board.title}</h1>

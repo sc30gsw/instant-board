@@ -9,6 +9,3 @@ export type BoardWithNotes = InstaQLEntity<
   "boards",
   { owner: {}; notes: { author: {} } }
 >;
-
-
-

@@ -2,12 +2,8 @@ import * as v from "valibot";
 
 import { NOTE_COLORS } from "~/features/board/constants/board";
 
-
 export const noteFormSchema = v.object({
-  color: v.pipe(
-    v.string(),
-    v.picklist(NOTE_COLORS),
-  ),
+  color: v.pipe(v.string(), v.picklist(NOTE_COLORS)),
   content: v.pipe(
     v.string(),
     v.trim(),

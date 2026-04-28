@@ -1,36 +1,101 @@
-import { Button } from "@heroui/react";
+import { Button, FieldError, Label, TextField, Textarea } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { id } from "@instantdb/react";
+import type { AnyFormState } from "@tanstack/react-form";
 import { useState } from "react";
 
-import { db } from "~/db/instant";
 import { NOTE_COLORS } from "~/features/board/constants/board";
+import { useNoteCreateForm } from "~/features/board/hooks/use-note-create-form";
 
 type Props = {
   boardId: string;
   userId: string;
 };
 
+type NoteCreatorPanelProps = {
+  boardId: string;
+  onClose: () => void;
+  userId: string;
+};
+
+function NoteCreatorPanel({ boardId, userId, onClose }: NoteCreatorPanelProps) {
+  const { form } = useNoteCreateForm({ boardId, userId, onSuccess: onClose });
+  const [liveColor, setLiveColor] = useState<string>(NOTE_COLORS[0]);
+
+  return (
+    <form
+      className="bg-background fixed right-6 bottom-6 flex w-72 flex-col gap-3 rounded-xl p-4 shadow-xl"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void form.handleSubmit();
+      }}
+    >
+      <form.Field name="content">
+        {(field) => (
+          <div className="flex flex-col gap-1">
+            <TextField
+              className="w-full"
+              isInvalid={field.state.meta.errors.length > 0}
+              name={field.name}
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+            >
+              <Label className="sr-only">内容</Label>
+              <Textarea
+                className="h-32"
+                placeholder="アイデアを入力..."
+                style={{ backgroundColor: liveColor }}
+              />
+              {field.state.meta.errors.length > 0 ? (
+                <FieldError className="text-xs">{String(field.state.meta.errors[0])}</FieldError>
+              ) : null}
+            </TextField>
+          </div>
+        )}
+      </form.Field>
+      <form.Field name="color">
+        {(field) => (
+          <div className="flex gap-2">
+            {NOTE_COLORS.map((c) => (
+              <button
+                key={c}
+                className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: c,
+                  borderColor: c === field.state.value ? "#374151" : "transparent",
+                }}
+                type="button"
+                onClick={() => {
+                  field.handleChange(c);
+                  setLiveColor(c);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </form.Field>
+      <div className="flex gap-2">
+        <Button className="flex-1" type="button" variant="ghost" onPress={onClose}>
+          キャンセル
+        </Button>
+        <form.Subscribe>
+          {(state: AnyFormState) => (
+            <Button
+              className="flex-1"
+              isDisabled={state.isSubmitting}
+              type="submit"
+              variant="primary"
+            >
+              追加
+            </Button>
+          )}
+        </form.Subscribe>
+      </div>
+    </form>
+  );
+}
+
 export function NoteCreator({ boardId, userId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState("");
-  const [color, setColor] = useState<string>(NOTE_COLORS[0]);
-
-  function handleCreate() {
-    if (!content.trim()) return;
-    const noteId = id();
-    db.transact(
-      db.tx.notes[noteId]!.update({
-        color,
-        content: content.trim(),
-        createdAt: Date.now(),
-        x: 80 + Math.random() * 200,
-        y: 80 + Math.random() * 200,
-      }).link({ author: userId, board: boardId }),
-    );
-    setContent("");
-    setIsOpen(false);
-  }
 
   if (!isOpen) {
     return (
@@ -45,37 +110,5 @@ export function NoteCreator({ boardId, userId }: Props) {
     );
   }
 
-  return (
-    <div className="bg-background fixed right-6 bottom-6 flex w-72 flex-col gap-3 rounded-xl p-4 shadow-xl">
-      <textarea
-        className="h-32 w-full resize-none rounded-lg p-2 text-sm outline-none"
-        placeholder="アイデアを入力..."
-        style={{ backgroundColor: color }}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
-      <div className="flex gap-2">
-        {NOTE_COLORS.map((c) => (
-          <button
-            key={c}
-            className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
-            style={{
-              backgroundColor: c,
-              borderColor: c === color ? "#374151" : "transparent",
-            }}
-            type="button"
-            onClick={() => setColor(c)}
-          />
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <Button className="flex-1" variant="ghost" onPress={() => setIsOpen(false)}>
-          キャンセル
-        </Button>
-        <Button className="flex-1" variant="primary" onPress={handleCreate}>
-          追加
-        </Button>
-      </div>
-    </div>
-  );
+  return <NoteCreatorPanel boardId={boardId} userId={userId} onClose={() => setIsOpen(false)} />;
 }

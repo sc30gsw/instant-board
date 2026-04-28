@@ -29,7 +29,7 @@ export function UserMenu({
         <span className="max-w-32 truncate text-sm font-medium">{displayName}</span>
         <Icon className="text-foreground-400" height={16} icon="mdi:chevron-down" width={16} />
       </Popover.Trigger>
-      <Popover.Content className="z-50 p-2 flex flex-col gap-2" placement="bottom end">
+      <Popover.Content className="z-50 flex flex-col gap-2 p-2" placement="bottom end">
         {isGuest ? (
           <Button
             className="justify-start"
@@ -47,7 +47,7 @@ export function UserMenu({
           </Button>
         ) : null}
         <Button
-          className="justify-start text-danger"
+          className="text-danger justify-start"
           variant="ghost"
           onPress={() => {
             toggle(false);
