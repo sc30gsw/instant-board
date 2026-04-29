@@ -1,6 +1,7 @@
 import { db } from "~/db/instant";
+import type { Board } from "~/features/board/types/board";
 
-export function useBoard(boardId: string) {
+export function useBoard(boardId: Board["id"]) {
   return db.useQuery({
     boards: {
       $: { where: { id: boardId } },

@@ -30,7 +30,7 @@ export function useCredentialsForm({ mode, onSuccess, step, setStep }: UseCreden
             errorMap: { ...prev.errorMap, onServer: undefined },
           }));
         }
-        
+
         if (fieldApi.name === "password") {
           formApi.setFieldMeta("email", (prev: AnyFieldMetaBase | undefined) => ({
             ...emptyFieldMetaBase(),

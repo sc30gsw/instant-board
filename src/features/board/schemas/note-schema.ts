@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { NOTE_COLORS } from "~/features/board/constants/board";
 
 export const noteFormSchema = v.object({
-  color: v.pipe(v.string(), v.picklist(NOTE_COLORS)),
+  color: v.picklist(NOTE_COLORS),
   content: v.pipe(
     v.string(),
     v.trim(),
@@ -14,7 +14,9 @@ export const noteFormSchema = v.object({
 
 type NoteFormValue = v.InferOutput<typeof noteFormSchema>;
 
-export const noteCreateFormEmptyValues = {
+// ? as const satisfies だと color が常に NOTE_COLORS[0] に狭まるため
+// ? picklistの6種の型を期待しているuseNoteCreateFormと衝突する
+export const noteCreateFormEmptyValues: NoteFormValue = {
   color: NOTE_COLORS[0],
   content: "",
-} as const satisfies NoteFormValue;
+};
